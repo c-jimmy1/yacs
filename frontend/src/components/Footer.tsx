@@ -1,15 +1,34 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 function Footer() {
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check initial dark mode
+    const isDarkMode = document.documentElement.classList.contains('dark') ||
+                       window.matchMedia('(prefers-color-scheme: dark)').matches;
+    setIsDark(isDarkMode);
+
+    // Listen for dark mode changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => setIsDark(e.matches);
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const logoSrc = isDark ? '/logo/white-for-web.png' : '/logo/black-white-for-web.png';
+
   return (
     <footer className="bg-header text-input-foreground border-t border-b-border">
       <div className="max-w-6xl mx-auto px-6 py-8 grid grid-cols-12 gap-6 items-start">
-        {/* logo / brand */}
+        {/* logo */}
         <div className="col-span-3 flex items-center">
           <div className="inline-flex items-center justify-center border-2 border-white rounded-xl px-4 py-2 bg-transparent text-white text-lg font-semibold">
             RCOS
           </div>
+          <img src={logoSrc} alt="yacs logo" className="mt-2 h-8 w-auto" />
         </div>
 
         {/* link columns */}
