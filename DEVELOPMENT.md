@@ -1,4 +1,4 @@
-# 🚀 YACS Local Development Onboarding
+# 🚀 YACS Local Development Setup Guide
 
 Welcome to YACS (Yet Another Course Scheduler)! This guide will walk you through setting up the full stack on your local machine.
 
@@ -69,7 +69,7 @@ cd yacs
 ## Localhost Ports
 - Development UI: `http://localhost:3000`
 - FastAPI: `http://localhost:8000`
-- Postgres: `http://localhost:5433`
+- Postgres: `http://localhost:5432`
 
 ## Developer Notes
 - Remember to stop the YACS docker container when you're done to relieve system resources. Click the red Stop button under Actions in Docker Desktop next to `new_yacs`.

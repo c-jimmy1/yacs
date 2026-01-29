@@ -13,16 +13,23 @@ YACS is a student-led project to make course scheduling at RPI fast and easy. We
 | **Database** | PostgreSQL |
 | **Tools** | Docker, GitHub Actions |
 
----
+## 🏛️ Architecture Overview
+| Layer | Primary Files | Notes |
+| :--- | :--- | :--- |
+| Frontend | `frontend/src/index.tsx`, `frontend/src/app/App.tsx`, `frontend/src/context/schedule-context.tsx`, `frontend/src/lib/parseSchedule.ts` | React routes, app shell, schedule state, CSV parsing |
+| Backend | `backend/main.py`, `backend/controllers/*`, `backend/db/course_corequisite.py`, `backend/tables/*` | FastAPI routes, controllers, SQL helpers, ORM tables |
+| Data/Tools | `backend/scraper/main.py`, `frontend/public/*.csv`, `rpi_data/major_plans/*` | SIS9 scraping, course catalogs, major plan templates |
+| Dev Infra | `docker-compose.yml` | Local dev wiring for FE/BE/DB |
 
 ## 🤝 Join the Team
 
 We are looking for **Frontend developers, Backend developers, and Designers** to help us for the new semester of Spring 2026. 
 
 ### How to get started:
-1.  **Setup the project:** Follow the steps in [onboarding.md](./onboarding.md) to get YACS running locally on your machine.
-2.  **Pick a task:** Look for "Good First Issue" tags in our [GitHub Issues](https://github.com/JoJo-ESC/yacs/issues).
-3.  **Chat with us:** Join our [GitHub Discussions](https://github.com/JoJo-ESC/yacs/discussions) to chat and ask questions with the team.
+1.  **Review Contribution Guidelines:** Review the guidelines and best practices for contributing to YACS in [CONTRIBUTING.md](./CONTRIBUTING.md)
+2.  **Setup the project:** Follow the steps in [DEVELOPMENT.md](./DEVELOPMENT.md) to get YACS running locally on your machine.
+3.  **Pick a task:** Look for "Good First Issue" tags in our [GitHub Issues](https://github.com/JoJo-ESC/yacs/issues).
+4.  **Chat with us:** Join our [GitHub Discussions](https://github.com/JoJo-ESC/yacs/discussions) to chat and ask questions with the team.
 
 ---
 
