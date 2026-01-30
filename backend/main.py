@@ -1,26 +1,30 @@
 #!/usr/bin/python3
-from fastapi import FastAPI, Request, Response
+from fastapi import FastAPI, Request, Response, Depends
 from starlette.middleware.sessions import SessionMiddleware
+from sqlalchemy.orm import Session
 import os
 
 # Import Pydantic models and controllers
-from api_models import UserPydantic, SessionPydantic
+from api_models import UserPydantic, SessionPydantic, CourseCorequisiteCreate
 from controllers import user_controller, session_controller
-from tables.api_models import CourseCorequisiteCreate
-from db.course_corequisite import CourseCorequisite
-from db import database
+from tables import course_corequisite, SessionLocal
 
+
+# --- Database Dependency ---
+def get_db():
+    """Yields a database session and ensures it's closed after use."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 # --- Initialize FastAPI App ---
 app = FastAPI()
 
 # --- Add Middleware ---
-app.add_middleware(SessionMiddleware, secret_key="a_very_secret_key")
-
-# --- Add Helper Db Connection ---
-db_conn = database.db
-course_corequisite = CourseCorequisite(db_conn)
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY", "dev_secret_key"))
 
 
 # --- API Endpoints ---
@@ -30,10 +34,12 @@ async def root():
     """Confirms the API is running."""
     return {"message": "YACS API is Up!"}
 
+
 ## User Account Management ##
 @app.post('/api/user')
 async def add_user(user: UserPydantic):
     return user_controller.create_user(user.dict())
+
 
 @app.delete('/api/user')
 async def delete_user(request: Request):
@@ -42,37 +48,31 @@ async def delete_user(request: Request):
     user_id = request.session['user']['user_id']
     return user_controller.delete_current_user(user_id)
 
+
 ## Session Management (Login/Logout) ##
 @app.post('/api/session')
 async def log_in(request: Request, credentials: SessionPydantic):
     return session_controller.log_user_in(credentials.dict(), request.session)
 
+
 @app.delete('/api/session')
 def log_out(request: Request):
     return session_controller.log_user_out(request.session)
 
-# --- Add your Course, Professor, and other endpoints below ---
-# Example:
-# from controllers import course_controller
-#
-# @app.get('/api/semester')
-# async def get_semesters():
-#     return course_controller.get_all_semesters()
 
+## Corequisites ##
 @app.post('/api/corequisite')
-async def add_corequisite(coreq: CourseCorequisiteCreate):
-    success, error = course_corequisite.add_corequisite(
-        coreq.department, coreq.level, coreq.corequisite
+async def add_corequisite_endpoint(coreq: CourseCorequisiteCreate, db: Session = Depends(get_db)):
+    result = course_corequisite.add_corequisite(
+        db, coreq.department, coreq.level, coreq.corequisite
     )
-    if success:
-        return {"message": "Corequisite added successfully"}
-    else:
-        return Response(content=str(error), status_code=500)
+    return {"message": "Corequisite added successfully", "id": f"{result.department}-{result.level}"}
 
 
 @app.get('/api/corequisite/{department}/{level}')
-async def get_corequisites(department: str, level: int):
-    result, error = course_corequisite.get_corequisites(department, level)
-    if error:
-        return Response(content=str(error), status_code=500)
-    return result
+async def get_corequisites_endpoint(department: str, level: int, db: Session = Depends(get_db)):
+    results = course_corequisite.get_corequisites(db, department, level)
+    return [{"corequisite": r.corequisite} for r in results]
+
+
+# --- Course endpoints will go here (Issue #4) ---
